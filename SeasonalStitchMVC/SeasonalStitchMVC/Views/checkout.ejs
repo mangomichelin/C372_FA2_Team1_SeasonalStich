@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout - Seasonal Stitch</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">Seasonal Stitch</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/cart">Cart</a>
+            <% if (user) { %>
+                <span style="color: #fff;">Welcome, <%= user.full_name %></span>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-bottom: 1rem;">Payment</h2>
+        <div class="form-container" style="max-width: 760px; color: #1f2733;">
+            <h3 style="margin-bottom: 0.75rem; color: #1f2733;">Shipping Details</h3>
+            <form action="/checkout" method="post">
+                <div class="form-group">
+                    <label for="shipping_name" style="color: #1f2733;">Full Name</label>
+                    <input type="text" id="shipping_name" name="shipping_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="shipping_address" style="color: #1f2733;">Address</label>
+                    <textarea id="shipping_address" name="shipping_address" rows="3" required></textarea>
+                </div>
+
+                <h3 style="margin-top:1rem; color: #1f2733;">Payment Method</h3>
+                <div class="form-group" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; color: #1f2733;">
+                        <input type="radio" name="payment_method" value="credit" checked>
+                        Credit Card
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; color: #1f2733;">
+                        <input type="radio" name="payment_method" value="debit">
+                        Debit Card
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="card_name" style="color: #1f2733;">Name on Card</label>
+                    <input type="text" id="card_name" name="card_name" placeholder="As shown on card">
+                </div>
+                <div class="form-group">
+                    <label for="card_number" style="color: #1f2733;">Card Number</label>
+                    <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label for="card_expiry" style="color: #1f2733;">Expiry</label>
+                        <input type="text" id="card_expiry" name="card_expiry" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div>
+                        <label for="card_cvv" style="color: #1f2733;">CVV</label>
+                        <input type="password" id="card_cvv" name="card_cvv" placeholder="***" maxlength="4">
+                    </div>
+                </div>
+
+                <h3 style="margin-top:1rem;">Order Summary</h3>
+                <div style="margin-bottom: 1rem;">
+                    <% cart.forEach(item => { %>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <div>
+                                <strong><%= item.name %></strong>
+                                <div style="color: #4a5568; font-size: 0.9rem;">Qty: <%= item.quantity %></div>
+                            </div>
+                            <div style="font-weight: bold;">$<%= (Number(item.price) * item.quantity).toFixed(2) %></div>
+                        </div>
+                    <% }); %>
+                </div>
+                <p><strong>Items:</strong> <%= totals.items %></p>
+                <p><strong>Total:</strong> $<%= totals.total.toFixed(2) %></p>
+
+                <div class="admin-controls" style="margin-top: 1rem;">
+                    <a href="/cart" class="btn btn-primary" style="padding: 0.7rem 1.2rem;">Back to Cart</a>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.85rem 1.4rem; font-weight: bold;">Place Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

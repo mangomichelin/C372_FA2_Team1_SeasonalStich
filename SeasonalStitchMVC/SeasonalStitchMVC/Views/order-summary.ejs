@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Summary - Seasonal Stitch</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">Seasonal Stitch</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/cart">Cart</a>
+            <a href="/checkout">Payment</a>
+            <% if (user) { %>
+                <span style="color: #fff;">Welcome, <%= user.full_name %></span>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container" style="background:#fff; color:#1f2733; max-width: 760px; margin-bottom: 1.5rem;">
+            <h2 style="margin-bottom: 0.4rem; color:#1f2733;">Order #<%= order ? order.order_id : '' %> Summary</h2>
+            <% if (order) { %>
+                <p style="color:#1f2733; margin-bottom:0.5rem;">Placed on <%= new Date(order.created_at).toLocaleString() %></p>
+                <p style="color:#1f2733; margin-bottom:0.25rem;">Ship to: <strong><%= order.shipping_name %></strong></p>
+                <p style="color:#1f2733; margin-bottom:0.75rem;"><%= order.shipping_address %></p>
+            <% } %>
+        </div>
+
+        <% if (!items || items.length === 0) { %>
+            <p>No items found for this order.</p>
+        <% } else { %>
+            <div class="hoodies-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; justify-items: center; justify-content: center;">
+                <% items.forEach(item => { %>
+                    <div class="hoodie-card">
+                        <img src="/images/<%= item.image_url %>" alt="<%= item.name %>" style="height: 160px;">
+                        <div class="hoodie-info">
+                            <h3><%= item.name %></h3>
+                            <p class="stock">Qty: <%= item.quantity %></p>
+                            <p class="price">$<%= Number(item.price).toFixed(2) %> each</p>
+                            <p><strong>Line Total:</strong> $<%= (Number(item.price) * item.quantity).toFixed(2) %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <div class="form-container" style="max-width: 500px; margin: 1.5rem auto 0 auto; padding: 1.5rem; color:#1f2733;">
+                <h3 style="color:#1f2733;">Totals</h3>
+                <p><strong>Items:</strong> <%= totals.items %></p>
+                <p><strong>Order Total:</strong> $<%= totals.total.toFixed(2) %></p>
+                <div class="admin-controls" style="margin-top: 1rem; justify-content: center; gap: 1rem;">
+                    <a href="/" class="btn btn-primary" style="padding: 0.85rem 1.3rem; font-weight: bold;">Back to Products</a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

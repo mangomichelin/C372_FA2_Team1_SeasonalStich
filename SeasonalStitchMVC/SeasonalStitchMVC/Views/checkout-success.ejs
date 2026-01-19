@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Placed - Seasonal Stitch</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">Seasonal Stitch</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/cart">Cart</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container" style="max-width: 600px;">
+            <h2>Thank you!</h2>
+            <p>Your order has been placed.</p>
+            <p>Order ID: <strong><%= orderId %></strong></p>
+            <p>Total Paid: $<%= Number(total).toFixed(2) %></p>
+            <a class="btn btn-primary" href="/">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
