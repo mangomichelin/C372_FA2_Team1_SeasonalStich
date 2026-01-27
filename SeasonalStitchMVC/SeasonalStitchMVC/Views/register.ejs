@@ -15,9 +15,9 @@
     </nav>
 
     <div class="container">
-        <div class="form-container" style="max-width: 420px;">
-            <h2 style="margin-bottom: 0.5rem;">Create your account</h2>
-            <p style="margin-bottom: 1rem; color: #4a5568;">Join Seasonal Stitch to save your favorites and track orders.</p>
+        <div class="form-container form-compact">
+            <h2>Create your account</h2>
+            <p>Join Seasonal Stitch to save your favorites and track orders.</p>
 
             <% if (typeof error !== 'undefined' && error) { %>
                 <div class="error-message"><%= error %></div>
@@ -39,10 +39,10 @@
                     <input id="password" type="password" name="password" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem 1rem; font-weight: bold;">Register</button>
+                <button type="submit" class="btn btn-primary btn-full">Register</button>
             </form>
 
-            <p style="margin-top: 1rem; text-align: center;">Already have an account? <a href="/login">Login</a></p>
+            <p class="form-footer">Already have an account? <a href="/login">Login</a></p>
         </div>
     </div>
 </body>

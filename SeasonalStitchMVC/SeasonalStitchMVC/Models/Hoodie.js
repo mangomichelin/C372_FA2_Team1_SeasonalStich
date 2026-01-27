@@ -4,7 +4,13 @@ const db = require('../db');
 // Model for interacting with the "hoodies" table
 const Hoodie = {
     getAll: (callback) => {
-        const sql = 'SELECT * FROM hoodies';
+        const sql = `
+            SELECT h.*, COALESCE(AVG(r.rating), 0) AS avg_rating,
+                   COUNT(r.review_id) AS review_count
+            FROM hoodies h
+            LEFT JOIN reviews r ON r.hoodie_id = h.hoodie_id
+            GROUP BY h.hoodie_id
+        `;
         db.query(sql, callback);
     },
 
@@ -29,6 +35,11 @@ const Hoodie = {
     delete: (id, callback) => {
         const sql = 'DELETE FROM hoodies WHERE hoodie_id = ?';
         db.query(sql, [id], callback);
+    },
+
+    restock: (id, quantity, callback) => {
+        const sql = 'UPDATE hoodies SET stock = stock + ? WHERE hoodie_id = ?';
+        db.query(sql, [quantity, id], callback);
     }
 };
 

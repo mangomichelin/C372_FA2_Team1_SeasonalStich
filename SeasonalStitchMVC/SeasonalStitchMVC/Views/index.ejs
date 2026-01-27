@@ -11,10 +11,16 @@
             <a href="/">Home</a>
             <a href="/cart">Cart<% if (typeof cartCount !== 'undefined') { %> (<%= cartCount %>)<% } %></a>
             <% if (user && user.role === 'admin') { %>
-                <a href="/addHoodie" class="admin-btn">Add New Hoodie</a>
+                <a href="/addHoodie" class="btn btn-outline admin-btn">Add New Hoodie</a>
             <% } %>
             <% if (user) { %>
-                <span style="color: #fff;">Welcome, <%= user.full_name %></span>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin/orders">Orders</a>
+                <% } else { %>
+                    <a href="/orders">Orders</a>
+                <% } %>
+                <span class="nav-welcome">Points: <%= user.points || 0 %></span>
+                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
                 <a href="/logout">Logout</a>
             <% } else { %>
                 <a href="/loginUser">Login</a>
@@ -23,45 +29,72 @@
     </nav>
 
     <div class="container">
-        <section class="hero-banner hero-full" style="gap: 1.5rem;">
+        <section class="hero-banner hero-full">
             <div class="cta">
                 <h1>Welcome to Seasonal Stitch</h1>
-                <p style="max-width: 620px; margin: 0 auto;">Discover cozy hoodies tailored to every season. Browse our curated collection and stay comfortable all year round.</p>
+                <p>Discover cozy hoodies tailored to every season. Browse our curated collection and stay comfortable all year round.</p>
                 <% if (!user) { %>
-                    <a href="/login" class="btn btn-primary" style="padding: 0.95rem 1.6rem; font-weight: bold; margin-top: 1rem;">Shop the Collection</a>
+                    <div class="hero-actions">
+                        <a href="/login" class="btn btn-primary">Shop the Collection</a>
+                    </div>
                 <% } %>
             </div>
         </section>
 
         <% if (!user) { %>
-            <div class="form-container" style="max-width: 520px; text-align: center; margin-top: 2rem; background-color: #d3a48f; color: #fff;">
-                <h3 style="color: #fff;">Please log in to explore our collection</h3>
-                <p style="color: #f8fafc; margin: 0.75rem 0 1.25rem;">Sign in to browse products and add them to your cart.</p>
-                <a href="/login" class="btn btn-primary" style="padding: 0.85rem 1.3rem; font-weight: bold;">Go to Login</a>
+            <div class="callout-card">
+                <h3>Please log in to explore our collection</h3>
+                <p>Sign in to browse products and add them to your cart.</p>
+                <div class="hero-actions">
+                    <a href="/login" class="btn btn-primary">Go to Login</a>
+                </div>
             </div>
         <% } else { %>
             <% if (user.role === 'admin') { %>
                 <div class="admin-header">
                     <h2>Inventory Management</h2>
-                    <a href="/addHoodie" class="add-btn">+ Add New Hoodie</a>
+                    <a href="/addHoodie" class="btn btn-outline add-btn">+ Add New Hoodie</a>
                 </div>
             <% } %>
 
             <div class="hoodies-grid">
                 <% hoodies.forEach(hoodie => { %>
                     <div class="hoodie-card">
-                        <img src="/images/<%= hoodie.image_url %>" alt="<%= hoodie.name %>">
+                        <div class="hoodie-image-wrap">
+                            <img src="/images/<%= hoodie.image_url %>" alt="<%= hoodie.name %>">
+                        </div>
                         <div class="hoodie-info">
-                            <h3><%= hoodie.name %></h3>
-                            <p><%= hoodie.description %></p>
-                            <p class="price">$<%= Number(hoodie.price).toFixed(2) %></p>
-                            <p class="stock <%= hoodie.lowStock ? 'low-stock' : '' %>">
-                                Stock: <%= hoodie.stock %>
-                            </p>
-                            <div class="season-tag"><%= hoodie.season %></div>
-                            
+                            <details class="hoodie-details">
+                                <summary class="hoodie-summary">
+                                    <div>
+                                        <h3><%= hoodie.name %></h3>
+                                        <p class="price">$<%= Number(hoodie.price).toFixed(2) %></p>
+                                    </div>
+                                    <span class="summary-toggle">Details</span>
+                                </summary>
+                                <div class="hoodie-meta">
+                                    <p class="stock <%= hoodie.lowStock ? 'low-stock' : '' %>">
+                                        Stock: <%= hoodie.stock %>
+                                    </p>
+                                    <% const avgRating = Number(hoodie.avg_rating || 0); %>
+                                    <% if (Number(hoodie.review_count || 0) > 0) { %>
+                                        <p class="rating-line">Rating: <%= avgRating.toFixed(1) %> / 5 (<%= hoodie.review_count %>)</p>
+                                    <% } else { %>
+                                        <p class="rating-line">No reviews yet</p>
+                                    <% } %>
+                                    <% if (hoodie.lowStock) { %>
+                                        <% if (user && user.role === 'admin') { %>
+                                            <p class="low-stock">Low Stock - Please resock</p>
+                                        <% } else { %>
+                                            <p class="low-stock">Low Stock</p>
+                                        <% } %>
+                                    <% } %>
+                                    <div class="season-tag"><%= hoodie.season %></div>
+                                    <p class="hoodie-description"><%= hoodie.description %></p>
+                                </div>
+                            </details>
                             <% if (user && user.role !== 'admin') { %>
-                                <form action="/cart/add/<%= hoodie.hoodie_id %>" method="post" style="margin-top: 1rem;">
+                                <form action="/cart/add/<%= hoodie.hoodie_id %>" method="post" class="cart-add-form">
                                     <input type="hidden" name="quantity" value="1" />
                                     <button type="submit" class="btn btn-primary">Add to Cart</button>
                                 </form>
@@ -69,9 +102,9 @@
                             
                             <% if (user && user.role === 'admin') { %>
                                 <div class="admin-controls">
-                                    <a href="/editHoodie/<%= hoodie.hoodie_id %>" class="edit-btn">Edit</a>
+                                    <a href="/editHoodie/<%= hoodie.hoodie_id %>" class="btn btn-ghost edit-btn">Edit</a>
                                     <a href="/deleteHoodie/<%= hoodie.hoodie_id %>" 
-                                       class="delete-btn"
+                                       class="btn btn-danger delete-btn"
                                        onclick="return confirm('Are you sure you want to delete this item?')">
                                         Delete
                                     </a>

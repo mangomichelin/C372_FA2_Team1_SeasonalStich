@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory - Seasonal Stitch</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">Seasonal Stitch</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/inventory">Inventory</a>
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/orders">Orders</a>
+            <a href="/admin/reports">Reports</a>
+            <a href="/admin/users">Users</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="admin-header">
+            <h2>Inventory</h2>
+            <a href="/addHoodie" class="btn btn-outline">Add New Hoodie</a>
+        </div>
+
+        <% if (!hoodies || hoodies.length === 0) { %>
+            <p class="empty-state">No hoodies in inventory.</p>
+        <% } else { %>
+            <div class="orders-grid">
+                <% hoodies.forEach(hoodie => { %>
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <div>
+                                <p class="order-label">Hoodie</p>
+                                <h3><%= hoodie.name %></h3>
+                            </div>
+                            <div class="order-meta">
+                                <% if (hoodie.lowStock) { %>
+                                    <span class="status-pill low-stock">Low Stock - Please resock</span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="order-card-body">
+                            <p><strong>Season:</strong> <%= hoodie.season %></p>
+                            <p><strong>Stock:</strong> <%= hoodie.stock %></p>
+                        </div>
+                        <div class="order-card-footer">
+                            <a href="/editHoodie/<%= hoodie.hoodie_id %>" class="btn btn-outline">Update Stock</a>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

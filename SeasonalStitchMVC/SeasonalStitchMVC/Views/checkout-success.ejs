@@ -10,16 +10,27 @@
         <div class="nav-links">
             <a href="/">Home</a>
             <a href="/cart">Cart</a>
+            <% if (user) { %>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin/orders">Orders</a>
+                <% } else { %>
+                    <a href="/orders">Orders</a>
+                <% } %>
+                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
+                <a href="/logout">Logout</a>
+            <% } %>
         </div>
     </nav>
 
     <div class="container">
-        <div class="form-container" style="max-width: 600px;">
+        <div class="form-container form-medium">
             <h2>Thank you!</h2>
             <p>Your order has been placed.</p>
-            <p>Order ID: <strong><%= orderId %></strong></p>
             <p>Total Paid: $<%= Number(total).toFixed(2) %></p>
-            <a class="btn btn-primary" href="/">Back to Home</a>
+            <div class="admin-controls center">
+                <a class="btn btn-outline" href="/track/<%= orderId %>">Track Delivery</a>
+                <a class="btn btn-primary" href="/">Back to Home</a>
+            </div>
         </div>
     </div>
 </body>

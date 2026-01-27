@@ -10,10 +10,15 @@
         <div class="nav-links">
             <a href="/">Home</a>
             <% if (user && user.role === 'admin') { %>
-                <a href="/addHoodie" class="admin-btn">Add New Hoodie</a>
+                <a href="/addHoodie" class="btn btn-outline admin-btn">Add New Hoodie</a>
             <% } %>
             <% if (user) { %>
-                <span style="color: #fff;">Welcome, <%= user.full_name %></span>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin/orders">Orders</a>
+                <% } else { %>
+                    <a href="/orders">Orders</a>
+                <% } %>
+                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
                 <a href="/logout">Logout</a>
             <% } else { %>
                 <a href="/loginUser">Login</a>
@@ -24,11 +29,11 @@
     <div class="container">
         <div class="admin-header">
             <h2>Your Cart</h2>
-            <a href="/" class="add-btn">Continue Shopping</a>
+            <a href="/" class="btn btn-outline add-btn">Continue Shopping</a>
         </div>
 
         <% if (!cart || cart.length === 0) { %>
-            <p>Your cart is empty.</p>
+            <p class="empty-state">Your cart is empty.</p>
         <% } else { %>
             <div class="hoodies-grid">
                 <% cart.forEach(item => { %>
@@ -37,26 +42,26 @@
                         <div class="hoodie-info">
                             <h3><%= item.name %></h3>
                             <p class="price">$<%= Number(item.price).toFixed(2) %></p>
-                            <form action="/cart/update/<%= item.hoodie_id %>" method="post" class="form-group" style="margin-bottom: 0;">
+                            <form action="/cart/update/<%= item.hoodie_id %>" method="post" class="form-group">
                                 <label for="qty-<%= item.hoodie_id %>">Quantity</label>
                                 <input type="number" id="qty-<%= item.hoodie_id %>" name="quantity" min="1" value="<%= item.quantity %>" />
                                 <div class="admin-controls">
                                     <button type="submit" class="btn btn-primary">Update</button>
                                 </div>
                             </form>
-                            <form action="/cart/remove/<%= item.hoodie_id %>" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">Remove</button>
+                            <form action="/cart/remove/<%= item.hoodie_id %>" method="post">
+                                <button type="submit" class="btn btn-danger">Remove</button>
                             </form>
                         </div>
                     </div>
                 <% }); %>
             </div>
 
-            <div class="admin-controls" style="margin-top: 1.5rem; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <div class="cart-actions">
                 <form action="/cart/clear" method="post">
                     <button type="submit" class="btn btn-danger">Clear Cart</button>
                 </form>
-                <a href="/checkout" class="btn btn-primary" style="padding: 0.85rem 1.3rem; font-weight: bold;">Proceed to Payment</a>
+                <a href="/checkout" class="btn btn-primary">Proceed to Payment</a>
             </div>
         <% } %>
     </div>

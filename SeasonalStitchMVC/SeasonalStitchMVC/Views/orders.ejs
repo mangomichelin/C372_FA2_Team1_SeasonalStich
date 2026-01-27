@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= isAdmin ? 'All Orders' : 'Order History' %> - Seasonal Stitch</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">Seasonal Stitch</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <% if (user && user.role === 'admin') { %>
+                <a href="/admin/orders" class="btn btn-outline">Orders</a>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/reports">Reports</a>
+                <a href="/admin/users">Users</a>
+            <% } else { %>
+                <a href="/orders" class="btn btn-outline">Orders</a>
+                <a href="/cart">Cart</a>
+            <% } %>
+            <% if (user) { %>
+                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
+                <a href="/logout">Logout</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="admin-header">
+            <h2><%= isAdmin ? 'All Orders' : 'Your Orders' %></h2>
+            <% if (!isAdmin) { %>
+                <a href="/" class="btn btn-outline">Continue Shopping</a>
+            <% } %>
+        </div>
+
+        <% if (!orders || orders.length === 0) { %>
+            <p class="empty-state">No orders found yet.</p>
+        <% } else { %>
+            <div class="orders-grid">
+                <% orders.forEach(order => { const status = order.status === 'on_hold' ? 'pending' : (order.status || 'pending'); const refundStatus = order.refund_status || 'none'; %>
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <div>
+                                <p class="order-label">Order</p>
+                                <h3>#<%= order.order_id %></h3>
+                            </div>
+                            <div class="order-meta">
+                                <span class="order-date"><%= new Date(order.created_at).toLocaleDateString() %></span>
+                                <span class="status-pill status-<%= status %>">
+                                    <%= status === 'delivering' ? 'On delivery' : status === 'delivered' ? 'Delivered' : 'Pending' %>
+                                </span>
+                                <% if (refundStatus !== 'none') { %>
+                                    <span class="status-pill status-<%= refundStatus %>">Refund: <%= refundStatus %></span>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="order-card-body">
+                            <% if (isAdmin) { %>
+                                <p><strong>Customer:</strong> <%= order.full_name %></p>
+                                <p class="order-muted"><%= order.email %></p>
+                            <% } else { %>
+                                <p><strong>Ship to:</strong> <%= order.shipping_name %></p>
+                                <p class="order-muted"><%= order.shipping_address %></p>
+                            <% } %>
+                        </div>
+
+                        <div class="order-card-footer">
+                            <div>
+                                <p class="order-label">Items</p>
+                                <p class="order-count"><%= order.item_count %></p>
+                            </div>
+                            <div>
+                                <p class="order-label">Total</p>
+                                <p class="order-total">$<%= Number(order.total).toFixed(2) %></p>
+                            </div>
+                        </div>
+
+                        <% if (isAdmin) { %>
+                            <form action="/admin/orders/<%= order.order_id %>/status" method="post" class="status-form">
+                                <label for="status-<%= order.order_id %>" class="order-label">Status</label>
+                                <div class="status-control">
+                                    <select id="status-<%= order.order_id %>" name="status">
+                                        <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                        <option value="delivering" <%= status === 'delivering' ? 'selected' : '' %>>On delivery</option>
+                                        <option value="delivered" <%= status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-outline">Update</button>
+                                </div>
+                            </form>
+                            <% if (refundStatus === 'requested') { %>
+                                <form action="/admin/orders/<%= order.order_id %>/refund" method="post" class="status-form">
+                                    <label class="order-label">Refund Request</label>
+                                    <div class="status-control">
+                                        <select name="decision">
+                                            <option value="approved">Approve</option>
+                                            <option value="rejected">Reject</option>
+                                        </select>
+                                        <input type="text" name="note" placeholder="Admin note (optional)">
+                                        <button type="submit" class="btn btn-danger">Submit</button>
+                                    </div>
+                                </form>
+                            <% } %>
+                            <a href="/order-summary/<%= order.order_id %>" class="btn btn-primary">View Order</a>
+                            <a href="/track/<%= order.order_id %>" class="btn btn-outline">View Tracking</a>
+                        <% } else { %>
+                            <div class="order-actions">
+                                <a href="/order-summary/<%= order.order_id %>" class="btn btn-outline">View Order</a>
+                                <a href="/track/<%= order.order_id %>" class="btn btn-primary">Track</a>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

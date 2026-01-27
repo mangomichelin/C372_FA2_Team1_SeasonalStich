@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice #<%= invoice ? invoice.invoice_number : '' %> - Seasonal Stitch</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">Seasonal Stitch</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/order-summary/<%= order.order_id %>">Order Summary</a>
+            <a href="/orders">Orders</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container form-wide">
+            <div class="admin-header">
+                <div>
+                    <h2>Invoice</h2>
+                    <p class="order-muted">Invoice Number: <%= invoice ? invoice.invoice_number : '' %></p>
+                </div>
+                <a class="btn btn-outline" href="/invoice/<%= order.order_id %>">Download PDF</a>
+            </div>
+
+            <p><strong>Order ID:</strong> <%= order.order_id %></p>
+            <p><strong>Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
+            <p><strong>Billed To:</strong> <%= order.shipping_name %></p>
+            <p><%= order.shipping_address %></p>
+        </div>
+
+        <div class="form-container form-wide">
+            <h3>Items</h3>
+            <div class="hoodies-grid">
+                <% items.forEach(item => { %>
+                    <div class="hoodie-card">
+                        <img src="/images/<%= item.image_url %>" alt="<%= item.name %>">
+                        <div class="hoodie-info">
+                            <h3><%= item.name %></h3>
+                            <p class="stock">Qty: <%= item.quantity %></p>
+                            <p class="price">$<%= Number(item.price).toFixed(2) %></p>
+                            <p><strong>Line Total:</strong> $<%= (Number(item.price) * item.quantity).toFixed(2) %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+
+        <div class="form-container form-medium">
+            <h3>Totals</h3>
+            <p><strong>Subtotal:</strong> $<%= Number(invoice.subtotal).toFixed(2) %></p>
+            <p><strong>Tax:</strong> $<%= Number(invoice.tax).toFixed(2) %></p>
+            <p><strong>Total:</strong> $<%= Number(invoice.total).toFixed(2) %></p>
+        </div>
+    </div>
+</body>
+</html>

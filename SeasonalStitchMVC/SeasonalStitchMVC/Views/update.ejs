@@ -3,56 +3,6 @@
 <head>
     <title>Edit Hoodie - Seasonal Stitch</title>
     <link rel="stylesheet" href="/style.css">
-    <style>
-        .form-container {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .form-group input, 
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-        
-        .current-image {
-            max-width: 200px;
-            margin: 1rem 0;
-        }
-        
-        .submit-btn {
-            background: #2c5282;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        .submit-btn:hover {
-            background: #2a4365;
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -60,14 +10,17 @@
         <div class="nav-links">
             <a href="/">Home</a>
             <% if (user) { %>
-                <span style="color: #fff;">Welcome, <%= user.full_name %></span>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin/orders">Orders</a>
+                <% } %>
+                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
                 <a href="/logout">Logout</a>
             <% } %>
         </div>
     </nav>
 
     <div class="container">
-        <div class="form-container">
+        <div class="form-container form-wide">
             <h2>Edit Hoodie</h2>
             <form action="/editHoodie/<%= hoodie.hoodie_id %>" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
@@ -108,7 +61,7 @@
                     <input type="file" id="image" name="image" accept="image/*">
                 </div>
 
-                <button type="submit" class="submit-btn">Update Hoodie</button>
+                <button type="submit" class="btn btn-primary">Update Hoodie</button>
             </form>
         </div>
     </div>
