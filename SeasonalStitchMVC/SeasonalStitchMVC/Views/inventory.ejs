@@ -8,12 +8,12 @@
     <nav class="navbar">
         <a href="/" class="brand">Seasonal Stitch</a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/inventory">Inventory</a>
-            <a href="/admin/dashboard">Dashboard</a>
-            <a href="/admin/orders">Orders</a>
-            <a href="/admin/reports">Reports</a>
-            <a href="/admin/users">Users</a>
+            <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">Dashboard</a>
+            <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/admin/orders">Orders</a>
+            <a class="<%= activePage === 'inventory' ? 'active' : '' %>" href="/inventory">Inventory</a>
+            <a class="<%= activePage === 'reports' ? 'active' : '' %>" href="/admin/reports">Reports</a>
+            <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/users">Users</a>
+            <span class="nav-welcome center">Welcome, <%= user.full_name %></span>
             <a href="/logout">Logout</a>
         </div>
     </nav>
@@ -21,8 +21,26 @@
     <div class="container">
         <div class="admin-header">
             <h2>Inventory</h2>
-            <a href="/addHoodie" class="btn btn-outline">Add New Hoodie</a>
         </div>
+
+        <section class="filter-bar">
+            <form class="filter-form" method="get" action="/inventory">
+                <input type="text" name="q" placeholder="Search inventory..." value="<%= filters && filters.q ? filters.q : '' %>">
+                <select name="season">
+                    <option value="">Season</option>
+                    <option value="Spring/Summer" <%= filters && filters.season === 'Spring/Summer' ? 'selected' : '' %>>Spring/Summer</option>
+                    <option value="Fall/Winter" <%= filters && filters.season === 'Fall/Winter' ? 'selected' : '' %>>Fall/Winter</option>
+                    <option value="Limited" <%= filters && filters.season === 'Limited' ? 'selected' : '' %>>Limited Edition</option>
+                </select>
+                <select name="stock_status">
+                    <option value="">Stock Status</option>
+                    <option value="in" <%= filters && filters.stock_status === 'in' ? 'selected' : '' %>>In stock</option>
+                    <option value="low" <%= filters && filters.stock_status === 'low' ? 'selected' : '' %>>Low stock</option>
+                    <option value="out" <%= filters && filters.stock_status === 'out' ? 'selected' : '' %>>Out of stock</option>
+                </select>
+                <button type="submit" class="btn btn-outline btn-compact">Filter</button>
+            </form>
+        </section>
 
         <% if (!hoodies || hoodies.length === 0) { %>
             <p class="empty-state">No hoodies in inventory.</p>
@@ -53,5 +71,6 @@
             </div>
         <% } %>
     </div>
+    <%- include('partials/footer') %>
 </body>
 </html>

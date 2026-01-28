@@ -8,11 +8,12 @@
     <nav class="navbar">
         <a href="/" class="brand">Seasonal Stitch</a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/admin/dashboard">Dashboard</a>
-            <a href="/admin/orders">Orders</a>
-            <a href="/admin/reports">Reports</a>
-            <a href="/admin/users">Users</a>
+            <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">Dashboard</a>
+            <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/admin/orders">Orders</a>
+            <a class="<%= activePage === 'inventory' ? 'active' : '' %>" href="/inventory">Inventory</a>
+            <a class="<%= activePage === 'reports' ? 'active' : '' %>" href="/admin/reports">Reports</a>
+            <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/users">Users</a>
+            <span class="nav-welcome center">Welcome, <%= user.full_name %></span>
             <a href="/logout">Logout</a>
         </div>
     </nav>
@@ -172,5 +173,6 @@
             </div>
         </div>
     </div>
+    <%- include('partials/footer') %>
 </body>
 </html>

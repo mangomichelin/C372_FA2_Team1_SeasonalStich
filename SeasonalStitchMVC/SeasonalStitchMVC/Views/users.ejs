@@ -8,18 +8,32 @@
     <nav class="navbar">
         <a href="/" class="brand">Seasonal Stitch</a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/inventory">Inventory</a>
-            <a href="/admin/dashboard">Dashboard</a>
-            <a href="/admin/orders">Orders</a>
-            <a href="/admin/reports">Reports</a>
-            <a href="/admin/users">Users</a>
+            <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">Dashboard</a>
+            <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/admin/orders">Orders</a>
+            <a class="<%= activePage === 'inventory' ? 'active' : '' %>" href="/inventory">Inventory</a>
+            <a class="<%= activePage === 'reports' ? 'active' : '' %>" href="/admin/reports">Reports</a>
+            <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/users">Users</a>
+            <span class="nav-welcome center">Welcome, <%= user.full_name %></span>
             <a href="/logout">Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <h2 class="page-title">Users</h2>
+        <div class="admin-header">
+            <h2 class="page-title">Users</h2>
+        </div>
+
+        <section class="filter-bar">
+            <form class="filter-form" method="get" action="/admin/users">
+                <input type="text" name="q" placeholder="Search users..." value="<%= filters && filters.q ? filters.q : '' %>">
+                <select name="role">
+                    <option value="all" <%= !filters || filters.role === 'all' ? 'selected' : '' %>>All</option>
+                    <option value="admin" <%= filters && filters.role === 'admin' ? 'selected' : '' %>>Admins</option>
+                    <option value="user" <%= filters && filters.role === 'user' ? 'selected' : '' %>>Users</option>
+                </select>
+                <button type="submit" class="btn btn-outline btn-compact">Filter</button>
+            </form>
+        </section>
         <% if (!users || users.length === 0) { %>
             <p class="empty-state">No users found.</p>
         <% } else { %>
@@ -50,5 +64,6 @@
             </div>
         <% } %>
     </div>
+    <%- include('partials/footer') %>
 </body>
 </html>

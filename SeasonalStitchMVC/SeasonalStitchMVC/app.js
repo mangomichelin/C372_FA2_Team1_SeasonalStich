@@ -13,6 +13,7 @@ const ReportController = require("./Controllers/ReportController");
 const ReviewController = require("./Controllers/ReviewController");
 const paymentRoutes = require("./routes/paymentRoutes");
 const stripeRoutes = require("./routes/stripeRoutes");
+const footerStore = require("./utils/footerStore");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,35 @@ app.use(
   })
 );
 app.use(express.static(path.join(__dirname, "Public")));
+
+// Expose common locals for views (user, cart count, active page)
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  const cart = req.session.cart || [];
+  res.locals.cartCount = cart.reduce((count, item) => count + item.quantity, 0);
+  res.locals.cartTotal = cart.reduce(
+    (sum, item) => sum + Number(item.price || 0) * item.quantity,
+    0
+  );
+
+  let active = "";
+  if (res.locals.user && res.locals.user.role === "admin") {
+    if (req.path.startsWith("/admin/dashboard")) active = "dashboard";
+    else if (req.path.startsWith("/admin/orders")) active = "orders";
+    else if (req.path.startsWith("/inventory")) active = "inventory";
+    else if (req.path.startsWith("/admin/users")) active = "users";
+    else if (req.path.startsWith("/admin/reports")) active = "reports";
+  } else {
+    if (req.path === "/" || req.path.startsWith("/shop")) active = "shop";
+    else if (req.path.startsWith("/cart")) active = "cart";
+    else if (req.path.startsWith("/checkout")) active = "cart";
+    else if (req.path.startsWith("/orders")) active = "orders";
+    else if (req.path.startsWith("/login") || req.path.startsWith("/register")) active = "auth";
+  }
+  res.locals.activePage = active;
+  res.locals.footer = footerStore.get();
+  next();
+});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -64,6 +94,16 @@ const requireAdmin = (req, res, next) => {
   return next();
 };
 
+const requireCustomer = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+  if (req.session.user.role === "admin") {
+    return res.redirect("/admin/dashboard");
+  }
+  return next();
+};
+
 app.get("/", ProductController.list);
 
 app.get("/login", (req, res) => res.render("login"));
@@ -86,24 +126,24 @@ app.post(
 );
 app.get("/deleteHoodie/:id", requireAdmin, ProductController.delete);
 
-app.get("/cart", requireAuth, CartController.viewCart);
-app.post("/cart/add/:id", requireAuth, CartController.addItem);
-app.post("/cart/update/:id", requireAuth, CartController.updateQuantity);
-app.post("/cart/remove/:id", requireAuth, CartController.removeItem);
-app.post("/cart/clear", requireAuth, CartController.clearCart);
+app.get("/cart", requireCustomer, CartController.viewCart);
+app.post("/cart/add/:id", requireCustomer, CartController.addItem);
+app.post("/cart/update/:id", requireCustomer, CartController.updateQuantity);
+app.post("/cart/remove/:id", requireCustomer, CartController.removeItem);
+app.post("/cart/clear", requireCustomer, CartController.clearCart);
 
-app.get("/checkout", requireAuth, OrderController.checkoutPage);
-app.post("/checkout/promo", requireAuth, OrderController.applyPromo);
-app.post("/checkout", requireAuth, OrderController.placeOrder);
-app.post("/checkout/paypal-complete", requireAuth, OrderController.placeOrderPaypal);
-app.get("/checkout-success/:id", requireAuth, OrderController.checkoutSuccess);
+app.get("/checkout", requireCustomer, OrderController.checkoutPage);
+app.post("/checkout/promo", requireCustomer, OrderController.applyPromo);
+app.post("/checkout", requireCustomer, OrderController.placeOrder);
+app.post("/checkout/paypal-complete", requireCustomer, OrderController.placeOrderPaypal);
+app.get("/checkout-success/:id", requireCustomer, OrderController.checkoutSuccess);
 app.get("/order-summary/:id", requireAuth, OrderController.summaryByOrderId);
 app.get("/invoice/:id/view", requireAuth, OrderController.invoicePage);
 app.get("/invoice/:id", requireAuth, OrderController.invoicePdf);
 app.get("/track/:id", requireAuth, OrderController.trackingPage);
-app.get("/orders", requireAuth, OrderController.history);
-app.post("/orders/:id/refund", requireAuth, OrderController.requestRefund);
-app.post("/reviews/:orderId/:hoodieId", requireAuth, ReviewController.submit);
+app.get("/orders", requireCustomer, OrderController.history);
+app.post("/orders/:id/refund", requireCustomer, OrderController.requestRefund);
+app.post("/reviews/:orderId/:hoodieId", requireCustomer, ReviewController.submit);
 
 app.get("/admin/orders", requireAdmin, OrderController.adminHistory);
 app.post("/admin/orders/:id/status", requireAdmin, OrderController.updateStatus);
@@ -116,9 +156,21 @@ app.get("/admin/categories", requireAdmin, AdminController.categoriesPage);
 app.get("/admin/reports", requireAdmin, ReportController.adminReport);
 app.get("/admin/users", requireAdmin, AdminController.usersPage);
 app.post("/admin/users/:id/points", requireAdmin, AdminController.updateUserPoints);
+app.get("/admin/footer", requireAdmin, (req, res) => {
+  res.render("footer-edit", { user: req.session.user, footer: footerStore.get() });
+});
+app.post("/admin/footer", requireAdmin, (req, res) => {
+  footerStore.update({
+    instagram: req.body.instagram && req.body.instagram.trim(),
+    facebook: req.body.facebook && req.body.facebook.trim(),
+    email: req.body.email && req.body.email.trim(),
+    phone: req.body.phone && req.body.phone.trim()
+  });
+  res.redirect("/admin/footer");
+});
 
-app.use("/", paymentRoutes);
-app.use("/stripe", requireAuth, stripeRoutes);
+app.use("/paypal", requireCustomer, paymentRoutes);
+app.use("/stripe", requireCustomer, stripeRoutes);
 
 app.listen(PORT, () => {
   console.log(`Seasonal Stitch running on port ${PORT}`);

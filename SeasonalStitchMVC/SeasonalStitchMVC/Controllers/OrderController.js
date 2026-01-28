@@ -266,14 +266,48 @@ const OrderController = {
     history: (req, res) => {
         Order.getByUser(req.session.user.user_id, (err, orders) => {
             if (err) return res.status(500).send('Failed to load orders');
-            res.render('orders', { orders, user: req.session.user, isAdmin: false });
+            const statusFilter = (req.query.status || 'all').toLowerCase();
+            const filtered = (orders || []).filter((order) => {
+                const status = (order.status === 'on_hold' ? 'pending' : (order.status || 'pending')).toLowerCase();
+                return statusFilter === 'all' ? true : status === statusFilter;
+            });
+            res.render('orders', {
+                orders: filtered,
+                user: req.session.user,
+                isAdmin: false,
+                filters: { status: statusFilter }
+            });
         });
     },
 
     adminHistory: (req, res) => {
         Order.getAll((err, orders) => {
             if (err) return res.status(500).send('Failed to load orders');
-            res.render('orders', { orders, user: req.session.user, isAdmin: true });
+
+            const q = (req.query.q || '').trim().toLowerCase();
+            const statusFilter = (req.query.status || 'all').toLowerCase();
+            const refundFilter = (req.query.refund || 'all').toLowerCase();
+
+            const filtered = (orders || []).filter((order) => {
+                const status = (order.status === 'on_hold' ? 'pending' : (order.status || 'pending')).toLowerCase();
+                const refundStatus = (order.refund_status || 'none').toLowerCase();
+                const customerText = `${order.full_name || ''} ${order.email || ''} ${order.shipping_name || ''}`.toLowerCase();
+                const matchesQ = !q || customerText.includes(q) || String(order.order_id || '').includes(q);
+                const matchesStatus = statusFilter === 'all' ? true : status === statusFilter;
+                const matchesRefund = refundFilter === 'all' ? true : refundStatus === refundFilter;
+                return matchesQ && matchesStatus && matchesRefund;
+            });
+
+            res.render('orders', {
+                orders: filtered,
+                user: req.session.user,
+                isAdmin: true,
+                filters: {
+                    q: req.query.q || '',
+                    status: statusFilter,
+                    refund: refundFilter
+                }
+            });
         });
     },
 

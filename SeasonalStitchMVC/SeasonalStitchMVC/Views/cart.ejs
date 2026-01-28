@@ -8,20 +8,26 @@
     <nav class="navbar">
         <a href="/" class="brand">Seasonal Stitch</a>
         <div class="nav-links">
-            <a href="/">Home</a>
             <% if (user && user.role === 'admin') { %>
-                <a href="/addHoodie" class="btn btn-outline admin-btn">Add New Hoodie</a>
-            <% } %>
-            <% if (user) { %>
-                <% if (user.role === 'admin') { %>
-                    <a href="/admin/orders">Orders</a>
-                <% } else { %>
-                    <a href="/orders">Orders</a>
-                <% } %>
-                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
+                <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">Dashboard</a>
+                <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/admin/orders">Orders</a>
+                <a class="<%= activePage === 'inventory' ? 'active' : '' %>" href="/inventory">Inventory</a>
+                <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/users">Users</a>
+                <a class="<%= activePage === 'reports' ? 'active' : '' %>" href="/admin/reports">Reports</a>
+                <a href="/logout">Logout</a>
+            <% } else if (user) { %>
+                <a class="<%= activePage === 'shop' ? 'active' : '' %>" href="/#shop">Shop</a>
+                <a class="<%= activePage === 'cart' ? 'active' : '' %>" href="/cart">Cart (<%= cartCount %>)</a>
+                <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/orders">Orders</a>
+                <span class="nav-pill">Points: <%= user.points || 0 %></span>
+                <span class="nav-pill secondary">Profile</span>
+                <span class="nav-welcome center">Welcome, <%= user.full_name %></span>
                 <a href="/logout">Logout</a>
             <% } else { %>
-                <a href="/loginUser">Login</a>
+                <a href="/#hero">Home</a>
+                <a href="/#shop">Shop</a>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
             <% } %>
         </div>
     </nav>
@@ -33,7 +39,10 @@
         </div>
 
         <% if (!cart || cart.length === 0) { %>
-            <p class="empty-state">Your cart is empty.</p>
+            <div class="empty-state">
+                <p>Your cart is empty.</p>
+                <a class="btn btn-primary" href="/">Browse hoodies</a>
+            </div>
         <% } else { %>
             <div class="hoodies-grid">
                 <% cart.forEach(item => { %>
@@ -57,6 +66,12 @@
                 <% }); %>
             </div>
 
+            <div class="form-container form-medium">
+                <h3>Summary</h3>
+                <p><strong>Items:</strong> <%= totals.items %></p>
+                <p><strong>Subtotal:</strong> $<%= totals.total.toFixed(2) %></p>
+            </div>
+
             <div class="cart-actions">
                 <form action="/cart/clear" method="post">
                     <button type="submit" class="btn btn-danger">Clear Cart</button>
@@ -65,5 +80,6 @@
             </div>
         <% } %>
     </div>
+    <%- include('partials/footer') %>
 </body>
 </html>

@@ -95,14 +95,56 @@ const AdminController = {
                 ...hoodie,
                 lowStock: Number(hoodie.stock) <= 5
             }));
-            res.render('inventory', { user: req.session.user, hoodies: inventory });
+
+            const q = (req.query.q || '').trim().toLowerCase();
+            const season = (req.query.season || '').trim();
+            const stockStatus = (req.query.stock_status || '').trim(); // low, in, out
+
+            const filtered = inventory.filter((item) => {
+                const matchesText =
+                    !q ||
+                    item.name.toLowerCase().includes(q) ||
+                    (item.description || '').toLowerCase().includes(q);
+                const matchesSeason = !season || item.season === season;
+                const stockNum = Number(item.stock || 0);
+                let matchesStock = true;
+                if (stockStatus === 'low') matchesStock = item.lowStock && stockNum > 0;
+                if (stockStatus === 'in') matchesStock = stockNum > 0;
+                if (stockStatus === 'out') matchesStock = stockNum === 0;
+                return matchesText && matchesSeason && matchesStock;
+            });
+
+            res.render('inventory', {
+                user: req.session.user,
+                hoodies: filtered,
+                filters: {
+                    q: req.query.q || '',
+                    season,
+                    stock_status: stockStatus
+                }
+            });
         });
     },
 
     usersPage: (req, res) => {
         User.getAll((err, users) => {
             if (err) return res.status(500).send('Failed to load users');
-            res.render('users', { user: req.session.user, users: users || [] });
+            const q = (req.query.q || '').trim().toLowerCase();
+            const role = (req.query.role || 'all').toLowerCase();
+            const filtered = (users || []).filter((u) => {
+                const matchesText =
+                    !q ||
+                    u.full_name.toLowerCase().includes(q) ||
+                    u.email.toLowerCase().includes(q) ||
+                    (u.role || '').toLowerCase().includes(q);
+                const matchesRole = role === 'all' ? true : (u.role || '').toLowerCase() === role;
+                return matchesText && matchesRole;
+            });
+            res.render('users', {
+                user: req.session.user,
+                users: filtered,
+                filters: { q: req.query.q || '', role }
+            });
         });
     },
 

@@ -15,7 +15,10 @@ const UserController = {
             if (err) return res.render('login', { error: 'Server error' });
             if (!user) return res.render('login', { error: 'Invalid email or password' });
             req.session.user = user;
-            res.redirect('/');
+            if (user.role === 'admin') {
+                return res.redirect('/admin/dashboard');
+            }
+            return res.redirect('/');
         });
     },
 

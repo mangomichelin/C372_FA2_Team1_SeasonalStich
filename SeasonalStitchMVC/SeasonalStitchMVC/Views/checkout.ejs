@@ -8,18 +8,26 @@
     <nav class="navbar">
         <a href="/" class="brand">Seasonal Stitch</a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/cart">Cart</a>
-            <% if (user) { %>
-                <% if (user.role === 'admin') { %>
-                    <a href="/admin/orders">Orders</a>
-                <% } else { %>
-                    <a href="/orders">Orders</a>
-                <% } %>
-                <span class="nav-welcome">Welcome, <%= user.full_name %></span>
+            <% if (user && user.role === 'admin') { %>
+                <a class="<%= activePage === 'dashboard' ? 'active' : '' %>" href="/admin/dashboard">Dashboard</a>
+                <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/admin/orders">Orders</a>
+                <a class="<%= activePage === 'inventory' ? 'active' : '' %>" href="/inventory">Inventory</a>
+                <a class="<%= activePage === 'reports' ? 'active' : '' %>" href="/admin/reports">Reports</a>
+                <a class="<%= activePage === 'users' ? 'active' : '' %>" href="/admin/users">Users</a>
+                <a href="/logout">Logout</a>
+            <% } else if (user) { %>
+                <a class="<%= activePage === 'shop' ? 'active' : '' %>" href="/#shop">Shop</a>
+                <a class="<%= activePage === 'cart' ? 'active' : '' %>" href="/cart">Cart (<%= cartCount %>)</a>
+                <a class="<%= activePage === 'orders' ? 'active' : '' %>" href="/orders">Orders</a>
+                <span class="nav-pill">Points: <%= user.points || 0 %></span>
+                <span class="nav-pill secondary">Profile</span>
+                <span class="nav-welcome center">Welcome, <%= user.full_name %></span>
                 <a href="/logout">Logout</a>
             <% } else { %>
+                <a href="/#hero">Home</a>
+                <a href="/#shop">Shop</a>
                 <a href="/login">Login</a>
+                <a href="/register">Register</a>
             <% } %>
         </div>
     </nav>
@@ -238,5 +246,6 @@
         }
     </script>
 
+    <%- include('partials/footer') %>
 </body>
 </html>
