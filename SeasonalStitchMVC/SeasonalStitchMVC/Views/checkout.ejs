@@ -179,7 +179,8 @@
                     body: JSON.stringify({ orderID: data.orderID })
                 })
                     .then((res) => res.json())
-                    .then(() => {
+                    .then((capturePayload) => {
+                        const captureId = (capturePayload && capturePayload.captureId) || data.orderID;
                         return fetch('/checkout/paypal-complete', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -187,7 +188,9 @@
                                 shipping_name: document.getElementById('shipping_name').value,
                                 shipping_address: document.getElementById('shipping_address').value,
                                 use_points: usePoints && usePoints.checked,
-                                promo_code: promoInput ? promoInput.value : ''
+                                promo_code: promoInput ? promoInput.value : '',
+                                paypal_ref: captureId,
+                                paypal_order_id: data.orderID
                             })
                         });
                     })
@@ -229,9 +232,14 @@
                         promo_code: promoInput ? promoInput.value : ''
                     })
                 })
-                    .then((res) => res.ok ? res.json() : res.json().then((payload) => {
-                        throw new Error((payload && payload.error) || 'Failed to create Stripe session');
-                    }))
+                    .then((res) => {
+                        if (res.ok) return res.json();
+                        // surface server error text/HTML instead of JSON parse error
+                        return res.text().then((txt) => {
+                            const message = (txt && txt.slice(0, 500)) || 'Failed to create Stripe session';
+                            throw new Error(message);
+                        });
+                    })
                     .then((payload) => {
                         if (!payload || !payload.url) {
                             throw new Error('Failed to create Stripe session');

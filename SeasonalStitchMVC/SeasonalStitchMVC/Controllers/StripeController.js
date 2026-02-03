@@ -5,10 +5,12 @@ const PromoCode = require('../Models/PromoCode');
 const { calculatePricing } = require('../utils/pricing');
 
 const getStripeClient = () => {
-    if (!process.env.STRIPE_SECRET_KEY) {
+    // Accept both STRIPE_SECRET_KEY and stripe_secret_key to match .env naming
+    const key = process.env.STRIPE_SECRET_KEY || process.env.stripe_secret_key;
+    if (!key) {
         return null;
     }
-    return new Stripe(process.env.STRIPE_SECRET_KEY);
+    return new Stripe(key);
 };
 
 const ensureInvoice = (orderId, total, callback) => {
@@ -225,6 +227,8 @@ const StripeController = {
             const baseUrl = buildBaseUrl(req);
             stripe.checkout.sessions.create({
                 mode: 'payment',
+                client_reference_id: String(orderId),
+                payment_intent_data: { metadata: { order_id: String(orderId) } },
                 line_items: lineItems,
                 metadata: { order_id: String(orderId) },
                 success_url: `${baseUrl}/stripe/success?session_id={CHECKOUT_SESSION_ID}`,

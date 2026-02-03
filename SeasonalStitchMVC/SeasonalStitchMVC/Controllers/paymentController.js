@@ -77,7 +77,16 @@ exports.captureOrder = async (req, res) => {
     request.requestBody({});
 
     const capture = await client().execute(request);
-    return res.json({ capture: capture.result });
+    const captureId =
+      capture &&
+      capture.result &&
+      capture.result.purchase_units &&
+      capture.result.purchase_units[0] &&
+      capture.result.purchase_units[0].payments &&
+      capture.result.purchase_units[0].payments.captures &&
+      capture.result.purchase_units[0].payments.captures[0] &&
+      capture.result.purchase_units[0].payments.captures[0].id;
+    return res.json({ capture: capture.result, captureId });
   } catch (e) {
     console.error("PayPal captureOrder error:", e);
     return res.status(500).json({ error: "Failed to capture order" });

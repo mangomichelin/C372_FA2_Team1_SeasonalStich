@@ -46,6 +46,8 @@
             <p><strong>Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
             <p><strong>Billed To:</strong> <%= order.shipping_name %></p>
             <p><%= order.shipping_address %></p>
+            <p><strong>Payment Method:</strong> <%= order.payment_provider || 'N/A' %></p>
+            <p><strong>Payment Reference:</strong> <%= order.payment_ref || 'N/A' %></p>
         </div>
 
         <div class="form-container form-wide">

@@ -37,6 +37,9 @@
             <h2>Thank you!</h2>
             <p>Your order has been placed.</p>
             <p>Total Paid: $<%= Number(total).toFixed(2) %></p>
+            <% if (paymentRef) { %>
+                <p class="order-muted">Payment Ref: <%= paymentRef %></p>
+            <% } %>
             <div class="admin-controls center">
                 <a class="btn btn-outline" href="/track/<%= orderId %>">Track Delivery</a>
                 <a class="btn btn-primary" href="/">Back to Home</a>

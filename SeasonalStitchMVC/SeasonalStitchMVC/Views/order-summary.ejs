@@ -51,6 +51,12 @@
                     Payment:
                     <strong><%= paymentStatus === 'paid' ? 'Paid' : 'Unpaid' %></strong>
                 </p>
+                <% if (order.payment_provider) { %>
+                    <p class="order-muted">Method: <%= order.payment_provider %></p>
+                <% } %>
+                <% if (order.payment_ref) { %>
+                    <p class="order-muted">Payment Ref: <%= order.payment_ref %></p>
+                <% } %>
                 <% if (user && user.role !== 'admin' && paymentStatus !== 'paid') { %>
                     <form action="/stripe/checkout-session/<%= order.order_id %>" method="post" class="admin-controls">
                         <button type="submit" class="btn btn-primary">Pay with Stripe</button>

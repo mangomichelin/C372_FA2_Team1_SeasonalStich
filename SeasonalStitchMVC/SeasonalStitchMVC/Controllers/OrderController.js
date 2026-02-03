@@ -49,7 +49,7 @@ const renderCheckout = (req, res, payload) => {
         totals: payload.totals,
         user: req.session.user,
         paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
-        stripeEnabled: Boolean(process.env.STRIPE_SECRET_KEY),
+        stripeEnabled: Boolean(process.env.STRIPE_SECRET_KEY || process.env.stripe_secret_key),
         availablePoints: payload.availablePoints,
         maxDiscount: payload.maxDiscount,
         promoCode: payload.promoCode || '',
@@ -214,6 +214,7 @@ const OrderController = {
         const availablePoints = Number(req.session.user.points || 0);
         const wantsPoints = req.body.use_points === true || req.body.use_points === 'true';
         const promoCode = normalizePromoCode(req.body.promo_code);
+        const paypalRef = req.body.paypal_ref || req.body.paypal_order_id || null;
 
         const applyPricing = (promoPercent) => {
             const pricing = calculatePricing({
@@ -234,7 +235,8 @@ const OrderController = {
                     pointsRedeemed: pricing.pointsRedeemed,
                     pointsEarned: pricing.pointsEarned,
                     newPoints,
-                    paymentProvider: 'paypal'
+                    paymentProvider: 'paypal',
+                    paymentRef: paypalRef || null
                 },
                 (err, result) => {
                 if (err) {
@@ -349,6 +351,8 @@ const OrderController = {
             res.render('checkout-success', {
                 orderId: order.order_id,
                 total: Number(order.total),
+                paymentRef: order.payment_ref || '',
+                paymentProvider: order.payment_provider || '',
                 user: req.session.user
             });
         });
@@ -444,6 +448,8 @@ const OrderController = {
             doc.text(`Date: ${dateLabel}`);
             doc.text(`Customer: ${order.shipping_name || ''}`);
             doc.text(`Ship To: ${order.shipping_address || ''}`);
+            doc.text(`Payment Method: ${order.payment_provider || 'N/A'}`);
+            doc.text(`Payment Ref: ${order.payment_ref || 'N/A'}`);
             doc.moveDown();
 
             doc.fontSize(13).text('Items', { underline: true });

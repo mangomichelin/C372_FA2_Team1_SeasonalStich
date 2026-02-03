@@ -2,7 +2,7 @@ const defaultFooter = {
   instagram: "https://instagram.com/seasonalstitch",
   facebook: "https://facebook.com/seasonalstitch",
   email: "support@seasonalstitch.com",
-  phone: "+1 (800) 555-0123"
+  phone: "+65 6123 4567"
 };
 
 let footerData = { ...defaultFooter };

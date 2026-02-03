@@ -4,11 +4,23 @@ const ProductController = {
     list: (req, res) => {
         Hoodie.getAll((err, hoodies) => {
             if (err) return res.status(500).send('Error loading products');
-            const decorated = (hoodies || []).map((hoodie) => ({
-                ...hoodie,
-                image_url: hoodie.image_url ? hoodie.image_url.replace(/^\/?images\//i, '') : '',
-                lowStock: Number(hoodie.stock) <= 5
-            }));
+            const cart = req.session.cart || [];
+            const cartMap = cart.reduce((acc, item) => {
+                acc[item.hoodie_id] = (acc[item.hoodie_id] || 0) + Number(item.quantity || 0);
+                return acc;
+            }, {});
+
+            const decorated = (hoodies || []).map((hoodie) => {
+                const originalStock = Number(hoodie.stock || 0);
+                const reserved = Number(cartMap[hoodie.hoodie_id] || 0);
+                const available = Math.max(0, originalStock - reserved);
+                return {
+                    ...hoodie,
+                    stock: available,
+                    image_url: hoodie.image_url ? hoodie.image_url.replace(/^\/?images\//i, '') : '',
+                    lowStock: available <= 5
+                };
+            });
             const q = (req.query.q || '').trim().toLowerCase();
             const seasonFilter = (req.query.season || '').trim();
             const availability = (req.query.availability || '').trim();
